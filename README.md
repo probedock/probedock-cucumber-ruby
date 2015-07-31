@@ -1,6 +1,6 @@
 # Probe Dock Cucumber
 
-**Cucumber (Ruby) probe for [Probe Dock](https://github.com/probedock/probedock).**
+**[Cucumber](https://cucumber.io) (Ruby) probe for [Probe Dock](https://github.com/probedock/probedock).**
 
 [![Gem Version](https://badge.fury.io/rb/probedock-cucumber.svg)](http://badge.fury.io/rb/probedock-cucumber)
 [![Dependency Status](https://gemnasium.com/probedock/probedock-cucumber-ruby.svg)](https://gemnasium.com/probedock/probedock-cucumber-ruby)
