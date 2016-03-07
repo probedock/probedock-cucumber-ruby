@@ -8,6 +8,8 @@
 [![Coverage Status](https://coveralls.io/repos/probedock/probedock-cucumber-ruby/badge.svg)](https://coveralls.io/r/probedock/probedock-cucumber-ruby?branch=master)
 [![License](https://img.shields.io/github/license/probedock/probedock-cucumber-ruby.svg)](LICENSE.txt)
 
+
+
 ## Installation
 
 In your Gemfile:
@@ -18,6 +20,22 @@ gem 'probedock-cucumber', '~> 0.1.1'
 
 Then run `bundle install`.
 
+
+
+## Usage
+
+In your specification configuration file, configure the probe:
+
+```rb
+ProbeDockCucumber.configure do |config|
+  config.project.category = 'Cucumber'
+end
+```
+
+With [cucumber-rails](https://github.com/cucumber/cucumber-rails), the configuration file is `features/support/env.rb` with the default setup.
+
+
+
 ## Contributing
 
 * [Fork](https://help.github.com/articles/fork-a-repo)
@@ -26,6 +44,8 @@ Then run `bundle install`.
 * Create a [pull request](http://help.github.com/pull-requests/) from your branch
 
 Please add a [changelog](CHANGELOG.md) entry with your name for new features and bug fixes.
+
+
 
 ## License
 
