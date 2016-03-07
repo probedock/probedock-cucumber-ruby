@@ -32,12 +32,12 @@ require 'digest/sha1'
 module ProbeDockCucumber
   class Formatter
 
-    def initialize step_mother, io, options
+    def initialize(step_mother, io, options)
 
       # Initialize the Probe Dock client and an empty test run.
       config = ProbeDockProbe.config
-      @client = ProbeDockProbe::Client.new config.server, config.client_options
-      @test_run = ProbeDockProbe::TestRun.new config.project
+      @client = ProbeDockProbe::Client.new(config.server, config.client_options)
+      @test_run = ProbeDockProbe::TestRun.new(config.project)
 
       # Current feature data.
       @current_feature = nil
@@ -50,12 +50,12 @@ module ProbeDockCucumber
     end
 
     # Called when the test suite starts.
-    def before_features *args
+    def before_features(*args)
       @suite_start_time = Time.now
     end
 
     # Called before each feature is tested.
-    def before_feature feature, *args
+    def before_feature(feature, *args)
 
       # Store the first line of the feature's description.
       # It will be used in #add_result to build the complete name of the test.
@@ -69,7 +69,7 @@ module ProbeDockCucumber
     end
 
     # Called every time a tag is encountered, either at the feature or the scenario level.
-    def tag_name name, *args
+    def tag_name(name, *args)
       if @current_scenario
         @current_scenario_tags << name.sub(/^@/, '').strip
       else
@@ -78,7 +78,7 @@ module ProbeDockCucumber
     end
 
     # Called before each scenario is tested.
-    def before_feature_element feature_element, *args
+    def before_feature_element(feature_element, *args)
 
       # Store the first line of the scenario's description.
       # It will be used in #add_result to build the complete name of the test.
@@ -90,23 +90,27 @@ module ProbeDockCucumber
       @current_scenario_start_time = Time.now
     end
 
+    def scenario_name(keyword, name, file_colon_line, source_indent)
+      @current_scenario_file_colon_line = file_colon_line
+    end
+
     # Called after each scenario step (Given, When, Then) is executed.
-    def after_step_result keyword, step_match, multiline_arg, status, exception, *args
+    def after_step_result(keyword, step_match, multiline_arg, status, exception, *args)
       # If a step fails, the exception is provided here.
       # It will be used in #add_result to build the error message of the test.
       @current_scenario_error = exception if exception
     end
 
     # Called after each completed scenario.
-    def after_feature_element *args
+    def after_feature_element(*args)
       add_result
     end
 
     # Called when the test suite ends.
-    def after_features *args
+    def after_features(*args)
       end_time = Time.now
       @test_run.duration = ((end_time - @suite_start_time) * 1000).round
-      @client.process @test_run
+      @client.process(@test_run)
     end
 
     private
@@ -130,11 +134,19 @@ module ProbeDockCucumber
       # The fingerprint identifying the test contains the first line of the
       # feature's and the scenario's descriptions joined with a separator.
       fingerprint_data = [ @current_feature, @current_scenario ]
-      result_options[:fingerprint] = Digest::SHA1.hexdigest fingerprint_data.join('|||')
+      result_options[:fingerprint] = Digest::SHA1.hexdigest(fingerprint_data.join('|||'))
       result_options[:data][:fingerprint] = result_options[:fingerprint]
 
       # Build the message from the error's message and backtrace if an error occurred.
       result_options[:message] = failure_message @current_scenario_error if @current_scenario_error
+
+      metadata = result_options[:data]
+
+      # Add the file and line number to the metadata.
+      if m = @current_scenario_file_colon_line.match(/^([^:]+):(\d+)$/)
+        metadata['file.path'] = m[1].to_s
+        metadata['file.line'] = m[2].to_i
+      end
 
       @test_run.add_result result_options
     end
@@ -147,7 +159,7 @@ module ProbeDockCucumber
     def complete_name
 
       name = @current_feature.dup
-      if name.match /\.$/
+      if name.match(/\.$/)
         name << ' '
       else
         name << ': '
@@ -156,7 +168,7 @@ module ProbeDockCucumber
       name << @current_scenario
     end
 
-    def failure_message error
+    def failure_message(error)
       String.new.tap do |m|
         m << error.message
         m << "\n"
