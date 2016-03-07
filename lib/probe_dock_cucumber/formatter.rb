@@ -90,7 +90,7 @@ module ProbeDockCucumber
       @current_scenario_start_time = Time.now
     end
 
-    def scenario_name(keyword, name, file_colon_line, source_indent)
+    def scenario_name(keyword, name, file_colon_line, *args)
       @current_scenario_file_colon_line = file_colon_line
     end
 
@@ -143,7 +143,7 @@ module ProbeDockCucumber
       metadata = result_options[:data]
 
       # Add the file and line number to the metadata.
-      if m = @current_scenario_file_colon_line.match(/^([^:]+):(\d+)$/)
+      if @current_scenario_file_colon_line && m = @current_scenario_file_colon_line.match(/^([^:]+):(\d+)$/)
         metadata['file.path'] = m[1].to_s
         metadata['file.line'] = m[2].to_i
       end

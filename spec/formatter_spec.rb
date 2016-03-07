@@ -35,22 +35,22 @@ RSpec.describe ProbeDockCucumber::Formatter do
         {
           name: 'Probe Dock Cucumber',
           scenarios: [
-            { name: 'It should work' }
+            { name: 'It should work', file: 'spec/test_spec.rb', line: 42 }
           ]
         },
         {
           name: 'Probe Dock Cucumber',
           tags: %w(a b c),
           scenarios: [
-            { name: 'It should work', tags: %w(b d) },
-            { name: 'It might work', delay: 0.125 },
-            { name: 'It will not work', tags: %w(a foo e bar), error: true }
+            { name: 'It should work', tags: %w(b d), file: 'spec/a_spec.rb', line: 24 },
+            { name: 'It might work', delay: 0.125, file: 'spec/a_spec.rb', line: 42 },
+            { name: 'It will not work', tags: %w(a foo e bar), file: 'spec/b_spec.rb', line: 66, error: true }
           ]
         },
         {
           name: 'Feature.',
           scenarios: [
-            { name: 'Scenario' }
+            { name: 'Scenario', file: 'spec/test_spec.rb', line: 1 }
           ]
         }
       ]
@@ -61,14 +61,22 @@ RSpec.describe ProbeDockCucumber::Formatter do
       expect_result_options({
         name: 'Probe Dock Cucumber: It should work',
         fingerprint: sample_fingerprint,
-        passed: true
+        passed: true,
+        data: {
+          'file.path' => 'spec/test_spec.rb',
+          'file.line' => 42
+        }
       })
 
       expect_result_options({
         name: 'Probe Dock Cucumber: It should work',
         fingerprint: sample_fingerprint,
         passed: true,
-        tags: %w(a b c d)
+        tags: %w(a b c d),
+        data: {
+          'file.path' => 'spec/a_spec.rb',
+          'file.line' => 24
+        }
       })
 
       expect_result_options({
@@ -76,7 +84,11 @@ RSpec.describe ProbeDockCucumber::Formatter do
         fingerprint: 'd3579ae55325b799ee3bd7625c29b0dda21d7177',
         passed: true,
         tags: %w(a b c),
-        duration: 125
+        duration: 125,
+        data: {
+          'file.path' => 'spec/a_spec.rb',
+          'file.line' => 42
+        }
       })
 
       expect_result_options({
@@ -84,13 +96,21 @@ RSpec.describe ProbeDockCucumber::Formatter do
         fingerprint: 'c7e98fe2379af012960ce5e31ae2e8b3ae215293',
         passed: false,
         message: "bug\n  # a\n  # b\n  # c",
-        tags: %w(a b bar c e foo)
+        tags: %w(a b bar c e foo),
+        data: {
+          'file.path' => 'spec/b_spec.rb',
+          'file.line' => 66
+        }
       })
 
       expect_result_options({
         name: 'Feature. Scenario',
         fingerprint: 'fd4ca85610cbd90bbb08bd4d1c18f6c6a5f1eea8',
-        passed: true
+        passed: true,
+        data: {
+          'file.path' => 'spec/test_spec.rb',
+          'file.line' => 1
+        }
       })
 
       expect(test_run_double).not_to receive(:add_result)
@@ -158,6 +178,9 @@ RSpec.describe ProbeDockCucumber::Formatter do
                 subject.tag_name tag
               end
             end
+
+            file_colon_line = "#{scenario_options[:file]}:#{scenario_options[:line]}"
+            subject.scenario_name nil, scenario_options[:name], file_colon_line
 
             sleep scenario_options[:delay] if scenario_options[:delay]
 
