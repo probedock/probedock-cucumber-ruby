@@ -35,7 +35,7 @@ module ProbeDockCucumber
     def initialize(step_mother, io, options)
 
       # Initialize the Probe Dock client and an empty test run.
-      config = ProbeDockProbe.config
+      config = ProbeDockCucumber.config
       @client = ProbeDockProbe::Client.new(config.server, config.client_options)
       @test_run = ProbeDockProbe::TestRun.new(config.project)
 

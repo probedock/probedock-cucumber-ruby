@@ -12,7 +12,7 @@ RSpec.describe ProbeDockCucumber::Formatter do
   let(:cucumber_formatter_options){ {} }
 
   before :each do
-    allow(ProbeDockProbe).to receive(:config).and_return(config_double)
+    allow(ProbeDockCucumber).to receive(:config).and_return(config_double)
     allow(ProbeDockProbe::Client).to receive(:new).and_return(client_double)
     allow(ProbeDockProbe::TestRun).to receive(:new).and_return(test_run_double)
   end
