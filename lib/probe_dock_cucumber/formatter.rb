@@ -90,6 +90,11 @@ module ProbeDockCucumber
       @current_scenario_start_time = Time.now
     end
 
+    # Called for each comment line
+    def comment_line(comment)
+      @annotation = ProbeDockProbe::Annotation.new(comment)
+    end
+
     def scenario_name(keyword, name, file_colon_line, *args)
       @current_scenario_file_colon_line = file_colon_line
     end
@@ -126,6 +131,12 @@ module ProbeDockCucumber
         data: {}
       }
 
+      # Annotation detected in the comments
+      if @annotation
+        result_options[:annotation] = @annotation
+        @annotation = nil
+      end
+
       result_options[:duration] = ((Time.now - @current_scenario_start_time) * 1000).round
 
       # Combine the tags of the feature and of the scenario.
@@ -148,7 +159,7 @@ module ProbeDockCucumber
         metadata['file.line'] = m[2].to_i
       end
 
-      @test_run.add_result result_options
+      @test_run.add_result(result_options)
     end
 
     # Builds the complete test name.

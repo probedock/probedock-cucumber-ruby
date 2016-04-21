@@ -52,6 +52,15 @@ RSpec.describe ProbeDockCucumber::Formatter do
           scenarios: [
             { name: 'Scenario', file: 'spec/test_spec.rb', line: 1 }
           ]
+        },
+				{
+          name: 'Feature with annotations.',
+          scenarios: [
+            { comments: [
+              '@probedock(key=123 category=cat tag=t1 ticket=ti1 active=false)',
+			        '@probedock(key=456 category=cat2 tag=t1a ticket=ti1a active=true)'
+						], name: 'Scenario', file: 'spec/test_spec.rb', line: 1 }
+          ]
         }
       ]
     end
@@ -113,12 +122,23 @@ RSpec.describe ProbeDockCucumber::Formatter do
         }
       })
 
+      expect_result_options({
+        name: 'Feature with annotations. Scenario',
+        fingerprint: '5c582130ece3956deb5ec0628171588da9e0ef2d',
+        passed: true,
+				annotation: ProbeDockProbe::Annotation.new('@probedock(key=456 category=cat2 tag=t1a ticket=ti1a active=true)'),
+        data: {
+         'file.path' => 'spec/test_spec.rb',
+         'file.line' => 1
+        }
+      })
+
       expect(test_run_double).not_to receive(:add_result)
 
       run
     end
 
-    def expect_result_options expected = {}
+    def expect_result_options(expected = {})
 
       expected[:name] ||= ''
       expected[:fingerprint] ||= ''
@@ -145,7 +165,15 @@ RSpec.describe ProbeDockCucumber::Formatter do
         expected.delete :duration
 
         expected.each_pair do |key,value|
-          expect(result_options[key]).to eq(value)
+          if value.kind_of?(ProbeDockProbe::Annotation)
+            expect(result_options[key].key).to eq(value.key)
+            expect(result_options[key].category).to eq(value.category)
+            expect(result_options[key].active).to eq(value.active)
+            expect(result_options[key].tags).to eq(value.tags)
+            expect(result_options[key].tickets).to eq(value.tickets)
+          else
+            expect(result_options[key]).to eq(value)
+          end
         end
 
         extra_keys = result_options.keys - expected.keys - [ :duration ]
@@ -176,6 +204,12 @@ RSpec.describe ProbeDockCucumber::Formatter do
             if scenario_options[:tags]
               scenario_options[:tags].each do |tag|
                 subject.tag_name tag
+              end
+            end
+
+            if scenario_options[:comments]
+              scenario_options[:comments].each do |comment|
+                subject.comment_line comment
               end
             end
 
