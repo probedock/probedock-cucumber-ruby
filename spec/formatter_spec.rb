@@ -59,7 +59,10 @@ RSpec.describe ProbeDockCucumber::Formatter do
             { comments: [
               '@probedock(key=123 category=cat tag=t1 ticket=ti1 active=false)',
 			        '@probedock(key=456 category=cat2 tag=t1a ticket=ti1a active=true)'
-						], name: 'Scenario', file: 'spec/test_spec.rb', line: 1 }
+						], name: 'Scenario', file: 'spec/test_spec.rb', line: 1 },
+						{ comments: [
+              '@probedock(key=789 category=cat3 tag=t1b ticket=ti1b active=false)'
+            ], name: 'Scenario after a previous annotated one', file: 'spec/test_spec.rb', line: 1 }
           ]
         }
       ]
@@ -130,6 +133,17 @@ RSpec.describe ProbeDockCucumber::Formatter do
         data: {
          'file.path' => 'spec/test_spec.rb',
          'file.line' => 1
+        }
+      })
+
+      expect_result_options({
+        name: 'Feature with annotations. Scenario after a previous annotated one',
+        fingerprint: '047465238c29ae9dafeb2134b1ed4f4a73fb1996',
+        passed: true,
+        annotation: ProbeDockProbe::Annotation.new('@probedock(key=789 category=cat3 tag=t1b ticket=ti1b active=false)'),
+        data: {
+          'file.path' => 'spec/test_spec.rb',
+          'file.line' => 1
         }
       })
 
