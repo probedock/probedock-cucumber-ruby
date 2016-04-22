@@ -49,8 +49,27 @@ RSpec.describe ProbeDockCucumber::Formatter do
         },
         {
           name: 'Feature.',
+		      scenarios: [
+            { name: 'Scenario', file: 'spec/test_spec.rb', line: 1 }
+          ]
+        },
+				{
+          name: 'Feature with annotation on it.',
+          comments: [ '@probedock(category=fcat tag=ft1 ticket=fti1 active=true)' ],
           scenarios: [
             { name: 'Scenario', file: 'spec/test_spec.rb', line: 1 }
+          ]
+        },
+				{
+          name: 'Feature with annotation on it and on scenario.',
+          comments: [ '@probedock(category=fcat tag=ft1 ticket=fti1 active=true)' ],
+          scenarios: [
+            {
+              comments: [ '@probedock(key=skey category=scat tag=st1 ticket=sti1 active=false)' ],
+              name: 'Scenario',
+							file: 'spec/test_spec.rb',
+							line: 1
+						}
           ]
         },
 				{
@@ -119,6 +138,28 @@ RSpec.describe ProbeDockCucumber::Formatter do
         name: 'Feature. Scenario',
         fingerprint: 'fd4ca85610cbd90bbb08bd4d1c18f6c6a5f1eea8',
         passed: true,
+        data: {
+          'file.path' => 'spec/test_spec.rb',
+          'file.line' => 1
+        }
+      })
+
+			expect_result_options({
+        name: 'Feature with annotation on it. Scenario',
+        fingerprint: '05ab36af1067081ba2a5c35933aa7f6620875f81',
+        passed: true,
+				annotation: ProbeDockProbe::Annotation.new('@probedock(category=fcat tag=ft1 ticket=fti1 active=true)'),
+        data: {
+          'file.path' => 'spec/test_spec.rb',
+          'file.line' => 1
+        }
+      })
+
+			expect_result_options({
+        name: 'Feature with annotation on it and on scenario. Scenario',
+        fingerprint: '13ad10542e5c2144672798437b475e8bcdc5d77f',
+        passed: true,
+				annotation: ProbeDockProbe::Annotation.new('@probedock(key=skey category=scat tag=ft1 tag=st1 ticket=fti1 ticket=sti1 active=false)'),
         data: {
           'file.path' => 'spec/test_spec.rb',
           'file.line' => 1
@@ -200,45 +241,55 @@ RSpec.describe ProbeDockCucumber::Formatter do
 
       features.each do |feature_options|
 
-        feature = double name: feature_options[:name]
-        subject.before_feature feature
+        feature = double(name: feature_options[:name])
+        subject.before_feature(feature)
 
         if feature_options[:tags]
           feature_options[:tags].each do |tag|
-            subject.tag_name tag
+            subject.tag_name(tag)
           end
         end
+
+        if feature_options[:comments]
+          feature_options[:comments].each do |comment|
+            subject.comment_line(comment)
+          end
+        end
+
+        subject.feature_name
 
         if feature_options[:scenarios]
           feature_options[:scenarios].each do |scenario_options|
 
-            scenario = double name: scenario_options[:name]
+            scenario = double(name: scenario_options[:name])
             subject.before_feature_element scenario
 
             if scenario_options[:tags]
               scenario_options[:tags].each do |tag|
-                subject.tag_name tag
+                subject.tag_name(tag)
               end
             end
 
             if scenario_options[:comments]
               scenario_options[:comments].each do |comment|
-                subject.comment_line comment
+                subject.comment_line(comment)
               end
             end
 
             file_colon_line = "#{scenario_options[:file]}:#{scenario_options[:line]}"
-            subject.scenario_name nil, scenario_options[:name], file_colon_line
+            subject.scenario_name(nil, scenario_options[:name], file_colon_line)
 
             sleep scenario_options[:delay] if scenario_options[:delay]
 
             if scenario_options[:error]
-              subject.after_step_result nil, nil, nil, nil, error_double
+              subject.after_step_result(nil, nil, nil, nil, error_double)
             end
 
-            subject.after_feature_element scenario
+            subject.after_feature_element(scenario)
           end
         end
+
+        subject.after_feature
       end
 
       subject.after_features

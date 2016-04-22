@@ -40,6 +40,7 @@ module ProbeDockCucumber
       @test_run = ProbeDockProbe::TestRun.new(config.project)
 
       # Current feature data.
+      @current_feature_started = false
       @current_feature = nil
       @current_feature_tags = []
 
@@ -68,6 +69,11 @@ module ProbeDockCucumber
       @current_scenario_error = nil
     end
 
+    # Called for the feature name and after the before feature has been called
+    def feature_name(*args)
+      @current_feature_started = true
+    end
+
     # Called every time a tag is encountered, either at the feature or the scenario level.
     def tag_name(name, *args)
       if @current_scenario
@@ -92,7 +98,15 @@ module ProbeDockCucumber
 
     # Called for each comment line
     def comment_line(comment)
-      @annotation = ProbeDockProbe::Annotation.new(comment)
+      # Take care of annotation only if matched
+      if comment.match(ProbeDockProbe::Annotation::ANNOTATION_REGEXP)
+        # If the feature already started, the annotations are for scenarios
+        if @current_feature_started
+          @annotation = ProbeDockProbe::Annotation.new(comment)
+        else
+          @feature_annotation = ProbeDockProbe::Annotation.new(comment)
+        end
+      end
     end
 
     def scenario_name(keyword, name, file_colon_line, *args)
@@ -109,6 +123,12 @@ module ProbeDockCucumber
     # Called after each completed scenario.
     def after_feature_element(*args)
       add_result
+    end
+
+    # Called after the feature has been executed
+    def after_feature(*args)
+      @current_feature_started = false
+      @feature_annotation = nil
     end
 
     # Called when the test suite ends.
@@ -131,11 +151,15 @@ module ProbeDockCucumber
         data: {}
       }
 
-      # Annotation detected in the comments
-      if @annotation
+      if @annotation && @feature_annotation # Annotation on current feature and current scenario
+        result_options[:annotation] = @feature_annotation.merge(@annotation)
+      elsif @annotation # Annotation only for current scenario
         result_options[:annotation] = @annotation
-        @annotation = nil
+      elsif @feature_annotation # Annotation for the current feature
+        result_options[:annotation] = @feature_annotation
       end
+
+      @annotation = nil
 
       result_options[:duration] = ((Time.now - @current_scenario_start_time) * 1000).round
 
