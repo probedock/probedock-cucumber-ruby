@@ -152,7 +152,8 @@ module ProbeDockCucumber
       }
 
       if @annotation && @feature_annotation # Annotation on current feature and current scenario
-        result_options[:annotation] = @feature_annotation.merge(@annotation)
+        @feature_annotation.merge!(@annotation)
+        result_options[:annotation] = @feature_annotation
       elsif @annotation # Annotation only for current scenario
         result_options[:annotation] = @annotation
       elsif @feature_annotation # Annotation for the current feature
