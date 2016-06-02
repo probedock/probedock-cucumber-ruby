@@ -76,7 +76,8 @@ RSpec.describe ProbeDockCucumber::Formatter do
           name: 'Feature with annotations.',
           scenarios: [
             { comments: [
-              '@probedock(key=123 category=cat tag=t1 ticket=ti1 active=false)',
+              '# This is a cool scenario.',
+              '# And it has a Probe Dock annotation: @probedock(key=123 category=cat tag=t1 ticket=ti1 active=false)',
               '@probedock(key=456 category=cat2 tag=t1a ticket=ti1a active=true)'
             ], name: 'Scenario', file: 'spec/test_spec.rb', line: 1 },
             { comments: [
