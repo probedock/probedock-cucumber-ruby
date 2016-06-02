@@ -49,37 +49,37 @@ RSpec.describe ProbeDockCucumber::Formatter do
         },
         {
           name: 'Feature.',
-		      scenarios: [
+          scenarios: [
             { name: 'Scenario', file: 'spec/test_spec.rb', line: 1 }
           ]
         },
-				{
+        {
           name: 'Feature with annotation on it.',
           comments: [ '@probedock(category=fcat tag=ft1 ticket=fti1 active=true)' ],
           scenarios: [
             { name: 'Scenario', file: 'spec/test_spec.rb', line: 1 }
           ]
         },
-				{
+        {
           name: 'Feature with annotation on it and on scenario.',
           comments: [ '@probedock(category=fcat tag=ft1 ticket=fti1 active=true)' ],
           scenarios: [
             {
               comments: [ '@probedock(key=skey category=scat tag=st1 ticket=sti1 active=false)' ],
               name: 'Scenario',
-							file: 'spec/test_spec.rb',
-							line: 1
-						}
+              file: 'spec/test_spec.rb',
+              line: 1
+            }
           ]
         },
-				{
+        {
           name: 'Feature with annotations.',
           scenarios: [
             { comments: [
               '@probedock(key=123 category=cat tag=t1 ticket=ti1 active=false)',
-			        '@probedock(key=456 category=cat2 tag=t1a ticket=ti1a active=true)'
-						], name: 'Scenario', file: 'spec/test_spec.rb', line: 1 },
-						{ comments: [
+              '@probedock(key=456 category=cat2 tag=t1a ticket=ti1a active=true)'
+            ], name: 'Scenario', file: 'spec/test_spec.rb', line: 1 },
+            { comments: [
               '@probedock(key=789 category=cat3 tag=t1b ticket=ti1b active=false)'
             ], name: 'Scenario after a previous annotated one', file: 'spec/test_spec.rb', line: 1 }
           ]
@@ -144,22 +144,22 @@ RSpec.describe ProbeDockCucumber::Formatter do
         }
       })
 
-			expect_result_options({
+      expect_result_options({
         name: 'Feature with annotation on it. Scenario',
         fingerprint: '05ab36af1067081ba2a5c35933aa7f6620875f81',
         passed: true,
-				annotation: ProbeDockProbe::Annotation.new('@probedock(category=fcat tag=ft1 ticket=fti1 active=true)'),
+        annotation: ProbeDockProbe::Annotation.new('@probedock(category=fcat tag=ft1 ticket=fti1 active=true)'),
         data: {
           'file.path' => 'spec/test_spec.rb',
           'file.line' => 1
         }
       })
 
-			expect_result_options({
+      expect_result_options({
         name: 'Feature with annotation on it and on scenario. Scenario',
         fingerprint: '13ad10542e5c2144672798437b475e8bcdc5d77f',
         passed: true,
-				annotation: ProbeDockProbe::Annotation.new('@probedock(key=skey category=scat tag=ft1 tag=st1 ticket=fti1 ticket=sti1 active=false)'),
+        annotation: ProbeDockProbe::Annotation.new('@probedock(key=skey category=scat tag=ft1 tag=st1 ticket=fti1 ticket=sti1 active=false)'),
         data: {
           'file.path' => 'spec/test_spec.rb',
           'file.line' => 1
@@ -170,7 +170,7 @@ RSpec.describe ProbeDockCucumber::Formatter do
         name: 'Feature with annotations. Scenario',
         fingerprint: '5c582130ece3956deb5ec0628171588da9e0ef2d',
         passed: true,
-				annotation: ProbeDockProbe::Annotation.new('@probedock(key=456 category=cat2 tag=t1a ticket=ti1a active=true)'),
+        annotation: ProbeDockProbe::Annotation.new('@probedock(key=456 category=cat2 tag=t1a ticket=ti1a active=true)'),
         data: {
          'file.path' => 'spec/test_spec.rb',
          'file.line' => 1
