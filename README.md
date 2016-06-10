@@ -15,7 +15,7 @@
 In your Gemfile:
 
 ```rb
-gem 'probedock-cucumber', '~> 0.1.1'
+gem 'probedock-cucumber', '~> 0.1.2'
 ```
 
 Then run `bundle install`.
